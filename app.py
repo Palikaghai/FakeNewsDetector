@@ -6,15 +6,35 @@ import re
 import nltk
 from textblob import TextBlob
 from nltk.corpus import stopwords
+import os
 
-# Ensure NLTK stopwords are downloaded
+# === Setup ===
 nltk.download('stopwords')
 
-# Load trained model and vectorizer
-model = joblib.load("fake_news_model.pkl",compress=3)
+# === Rebuild split model file ===
+def reconstruct_file(base_name):
+    if os.path.exists(base_name):
+        return  # Already reconstructed
+
+    with open(base_name, "wb") as out_file:
+        i = 0
+        while True:
+            part_file = f"{base_name}.part{i}"
+            if not os.path.exists(part_file):
+                break
+            with open(part_file, "rb") as pf:
+                out_file.write(pf.read())
+            i += 1
+
+# === Reconstruct files ===
+reconstruct_file("fake_news_model.pkl")
+reconstruct_file("tfidf_vectorizer.pkl")
+
+# === Load model and vectorizer ===
+model = joblib.load("fake_news_model.pkl")
 tfidf = joblib.load("tfidf_vectorizer.pkl")
 
-# Function to clean input text (same as training)
+# === Text Cleaning ===
 def clean_text(text):
     text = re.sub(r"http\S+|www\S+", "", text)
     text = re.sub(r"<.*?>", "", text)
@@ -24,9 +44,9 @@ def clean_text(text):
     text = " ".join([word for word in text.split() if word not in stop_words])
     return text
 
-# Streamlit App UI
+# === Streamlit App UI ===
 st.set_page_config(page_title="Fake News Detector")
-st.title("📰 Fake News Detector")
+st.title("Fake News Detector")
 st.markdown("Type or paste a news **headline or short article** below to check if it's **real or fake**.")
 
 user_input = st.text_area("🖊️ Enter News Text Here")
