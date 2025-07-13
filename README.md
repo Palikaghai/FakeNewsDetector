@@ -15,17 +15,12 @@
 # Its Interface & Working Snapshots
 <img width="1920" height="1008" alt="Screenshot 2025-07-12 225426" src="https://github.com/user-attachments/assets/82d7cca2-874a-4b32-9cbe-99e386b3b258" />
 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+This Fake News Detector System in trained over the datasets attached in the Dataset subset ..
+(Will keep on updating it)
 
 
 
 
-
-
-
-
-
-
-
-
-
-# This Fake News Detector System in trained over the datasets attached in the Dataset subset. 
+𝑴𝒂𝒅𝒆 𝒃𝒚 𝑷𝒂𝒍𝒊𝒌𝒂 𝑮𝒉𝒂𝒊 𝒘𝒊𝒕𝒉💕
