@@ -11,7 +11,7 @@ from nltk.corpus import stopwords
 nltk.download('stopwords')
 
 # Load trained model and vectorizer
-model = joblib.load("fake_news_model.pkl")
+model = joblib.load("fake_news_model.pkl",compress=3)
 tfidf = joblib.load("tfidf_vectorizer.pkl")
 
 # Function to clean input text (same as training)
