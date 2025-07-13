@@ -1,0 +1,11 @@
+𝗨𝘀𝗲𝗱 𝘁𝘄𝗼 𝗱𝗮𝘁𝘀𝗲𝘁𝘀 𝗳𝗼𝗿 𝘵𝘳𝘢𝘪𝘯𝘪𝘯𝘨 𝘢𝘯𝘥 𝘵𝘦𝘴𝘵𝘪𝘯𝘨 𝘁𝗵𝗲 𝗺𝗼𝗱𝗲𝗹 𝗮𝗿𝗲 𝗺𝗲𝗻𝘁𝗶𝗼𝗻𝗲𝗱:
+                  ( 𝗣𝗿𝗼𝘃𝗶𝗱𝗶𝗻𝗴 𝘁𝗵𝗲𝗶𝗿 𝗦𝗼𝘂𝗿𝗰𝗲)
+https://www.kaggle.com/datasets/razanaqvi14/real-and-fake-news
+
+
+About Dataset
+In the digital age, misinformation spreads faster than ever. To combat this challenge, i present a robust dataset 
+crafted for the development and evaluation of machine learning models that can distinguish between real and fake news.
+This dataset is divided into two parts:
+I) True.csv – Contains 21,417 news
+II) Falso.csv - Contains 23,481 fabricated news
