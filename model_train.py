@@ -14,6 +14,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from scipy.sparse import hstack
 from wordcloud import WordCloud
+from sklearn.naive_bayes import MultinomialNB
 
 nltk.download('stopwords')
 
@@ -69,17 +70,27 @@ def plot_wordclouds(df):
 
 # Step 4: Train & Compare Models
 def train_and_compare(df):
+    from sklearn.metrics import precision_score, recall_score, f1_score
+    from sklearn.naive_bayes import MultinomialNB
+
     df['cleaned'] = df['text'].apply(clean_text)
     df['polarity'] = df['cleaned'].apply(lambda x: TextBlob(x).sentiment.polarity)
 
+    # Vectorize only the text
     tfidf = TfidfVectorizer(max_features=5000)
     X_text = tfidf.fit_transform(df['cleaned'])
-    X = hstack([X_text, np.array(df['polarity']).reshape(-1, 1)])
-    y = df['label']
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Split data BEFORE combining polarity (to avoid issues with Naive Bayes)
+    X_train_text, X_test_text, y_train, y_test, train_polarity, test_polarity = train_test_split(
+        X_text, df['label'], df['polarity'], test_size=0.2, random_state=42
+    )
 
-    # Model 1: Logistic Regression
+    # For other models, combine polarity
+    from scipy.sparse import hstack
+    X_train = hstack([X_train_text, np.array(train_polarity).reshape(-1, 1)])
+    X_test = hstack([X_test_text, np.array(test_polarity).reshape(-1, 1)])
+
+    # === Model 1: Logistic Regression
     print("🔸 Training Logistic Regression...")
     lr = LogisticRegression(max_iter=1000, class_weight='balanced')
     lr.fit(X_train, y_train)
@@ -87,62 +98,112 @@ def train_and_compare(df):
     acc_lr = accuracy_score(y_test, y_pred_lr)
     print(f"Logistic Regression Accuracy: {acc_lr:.4f}")
 
-    # Model 2: Random Forest (before tuning)
-    print("🔸 Training Random Forest...")
-    rf = RandomForestClassifier(n_estimators=100, class_weight='balanced')
+    # === Model 2: Random Forest
+    print("🌲 Training Random Forest...")
+    rf = RandomForestClassifier(n_estimators=100, class_weight='balanced', max_depth=20, n_jobs=-1, random_state=42)
     rf.fit(X_train, y_train)
     y_pred_rf = rf.predict(X_test)
     acc_rf = accuracy_score(y_test, y_pred_rf)
     print(f"Random Forest Accuracy: {acc_rf:.4f}")
 
-    # Model 3: Hyperparameter Tuned RF
+    # === Model 3: Tuned Random Forest
     print("🔍 Tuning Random Forest with GridSearchCV...")
     param_grid = {
         'n_estimators': [100, 200],
         'max_depth': [10, 20, None]
     }
-    grid = GridSearchCV(RandomForestClassifier(class_weight='balanced'), param_grid, cv=3)
+    grid = GridSearchCV(RandomForestClassifier(class_weight='balanced'), param_grid, cv=3, n_jobs=-1)
     grid.fit(X_train, y_train)
     best_model = grid.best_estimator_
     y_pred_best = best_model.predict(X_test)
     acc_best = accuracy_score(y_test, y_pred_best)
-
-    print(f"✅ Best Random Forest Accuracy: {acc_best:.4f}")
+    print(f"✅ Tuned RF Accuracy: {acc_best:.4f}")
     print(classification_report(y_test, y_pred_best))
 
-    # Confusion matrix
+    # === Model 4: Naive Bayes (uses only TF-IDF)
+    print("🧪 Training Naive Bayes...")
+    nb = MultinomialNB()
+    nb.fit(X_train_text, y_train)
+    y_pred_nb = nb.predict(X_test_text)
+    acc_nb = accuracy_score(y_test, y_pred_nb)
+    print(f"Naive Bayes Accuracy: {acc_nb:.4f}")
+
+    # === Confusion Matrix (for best RF)
     cm = confusion_matrix(y_test, y_pred_best)
     plt.figure(figsize=(5, 4))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                xticklabels=['Fake', 'Real'], yticklabels=['Fake', 'Real'])
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Fake', 'Real'], yticklabels=['Fake', 'Real'])
     plt.title("Confusion Matrix (Best RF)")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
     plt.savefig("confusion_matrix.png")
     plt.show()
 
-    # Feature importance
+    # === Feature Importance (Best RF)
     importances = best_model.feature_importances_
     indices = np.argsort(importances)[-10:][::-1]
-
     feature_names = list(tfidf.get_feature_names_out())
-    feature_names.append("polarity")  # add the extra feature name
+    feature_names.append("polarity")
     top_features = [feature_names[i] for i in indices]
 
     plt.figure(figsize=(8, 4))
     sns.barplot(x=importances[indices], y=top_features)
-    plt.title("Top 10 Important Features (TF-IDF + Polarity)")
+    plt.title("Top 10 Important Features (Random Forest)")
     plt.xlabel("Importance")
     plt.tight_layout()
     plt.savefig("feature_importance.png")
     plt.show()
 
-    # Save model & vectorizer
+    # === Save best model & vectorizer
     joblib.dump(best_model, "fake_news_model.pkl")
     joblib.dump(tfidf, "tfidf_vectorizer.pkl")
     print("✅ Model and vectorizer saved successfully!")
 
-# Step 5: Run Everything
+    # === Model Comparison Table
+    metrics = {
+        "Model": ["Logistic Regression", "Random Forest", "Tuned Random Forest", "Naive Bayes"],
+        "Accuracy": [
+            accuracy_score(y_test, y_pred_lr),
+            accuracy_score(y_test, y_pred_rf),
+            accuracy_score(y_test, y_pred_best),
+            accuracy_score(y_test, y_pred_nb)
+        ],
+        "Precision": [
+            precision_score(y_test, y_pred_lr),
+            precision_score(y_test, y_pred_rf),
+            precision_score(y_test, y_pred_best),
+            precision_score(y_test, y_pred_nb)
+        ],
+        "Recall": [
+            recall_score(y_test, y_pred_lr),
+            recall_score(y_test, y_pred_rf),
+            recall_score(y_test, y_pred_best),
+            recall_score(y_test, y_pred_nb)
+        ],
+        "F1 Score": [
+            f1_score(y_test, y_pred_lr),
+            f1_score(y_test, y_pred_rf),
+            f1_score(y_test, y_pred_best),
+            f1_score(y_test, y_pred_nb)
+        ]
+    }
+
+    comparison_df = pd.DataFrame(metrics)
+    print("\n📊 Model Comparison Table:")
+    print(comparison_df.to_string(index=False))
+    comparison_df.to_csv("model_comparison.csv", index=False)
+
+    # === Plot
+    comparison_df.set_index("Model")[["Accuracy", "Precision", "Recall", "F1 Score"]].plot(
+        kind='bar', colormap='Set2', figsize=(10, 6), ylim=(0, 1.05)
+    )
+    plt.title("Model Performance Comparison")
+    plt.ylabel("Score")
+    plt.tight_layout()
+    plt.savefig("model_performance_comparison.png")
+    plt.show()
+
+
+# Main Pipeline
 def main():
     print("🚀 Starting Fake News Detection Training...")
     df = load_data()
