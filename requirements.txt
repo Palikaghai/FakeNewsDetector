@@ -5,3 +5,4 @@ joblib
 nltk
 textblob
 scikit-learn
+Naive-Bayes
