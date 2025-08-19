@@ -1,4 +1,5 @@
-## FAKENEWSDETECTION
+## FAKE NEWS DETECTION
+
 Fake news on social media, has spread for personal or societal gain. So, this tool helps detecting fake news which is a multi-step procedure that entails analysing the content of the news to assess its trustworthiness. 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Why this model is needed?
