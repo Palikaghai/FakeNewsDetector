@@ -1,6 +1,4 @@
-## 📰 FAKE NEWS DETECTOR 📰
-
-
+Fake news on social media, has spread for personal or societal gain. So, this tool helps detecting fake news which is a multi-step procedure that entails analysing the content of the news to assess its trustworthiness. 
 # Why this model is needed?
 -> It is required because misinformation and disinformation are major problems in today's digital world. Here's a clear breakdown of why it's needed and why it's important:
 1) The internet is flooded with unverified and false news and people often share news on social media without checking facts. So, this helps stop the spread of lies..
