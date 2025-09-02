@@ -19,7 +19,7 @@ Fake news on social media, has spread for personal or societal gain. So, this to
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 This Fake News Detector System in trained over the datasets attached in the Dataset subset ..
-(Will keep on updating it)
+
 
 
 
