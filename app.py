@@ -8,7 +8,6 @@ from textblob import TextBlob
 from nltk.corpus import stopwords
 import os
 
-# === Setup ===
 nltk.download('stopwords')
 
 # === Rebuild split model file ===
@@ -69,3 +68,4 @@ if st.button("Analyze"):
             st.success(f"✅ This news is **REAL** ({confidence}% confidence)")
         else:
             st.error(f"❌ This news is **FAKE** ({confidence}% confidence)")
+
