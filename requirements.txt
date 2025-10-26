@@ -6,3 +6,4 @@ nltk
 textblob
 scikit-learn
 Naive-Bayes
+sckitlearn(for libararies)
